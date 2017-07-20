@@ -116,6 +116,42 @@ plot.snps
 ###Subset SNPs between 52.0 and 75.0 Mb
 
 ```{r}
-Chr2.FNL.data <- filter(Chr2.Q40.tidy.data, POS > 52000000 & POS < 75000000)
+Chr2.Q40.congenic.tidy.data <- filter(Chr2.Q40.tidy.data, POS > 52000000 & POS < 75000000)
 ```
+
+
+
+```{r}
+# stop_gained
+stop_gained <- filter(Chr2.Q40.congenic.tidy.data, grepl("stop_gained", INFO))
+```
+
+This is Epac2. Boom!
+
+
+###Let's make a table!
+
+```{r}
+# count the numbers common and unique to each genotype
+ftable(Chr2.Q40.congenic.tidy.data[,c("DBA_gt","Chr2_gt")])
+```
+
+```{r}
+# eliminate SNPs that are DBA_gt==1/1 & Chr2_gt==1/1
+Chr2.FNL.data <- subset(Chr2.Q40.congenic.tidy.data,!(DBA_gt=="1/1" & Chr2_gt == "1/1") )
+```
+
+
+### Let's start looking for meaningful variants!
+
+```{r}
+# stop_lost
+stop_lost <- filter(Chr2.FNL.data, grepl("stop_lost", INFO))
+# start_lost
+start_lost <- filter(Chr2.FNL.data, grepl("start_lost", INFO))
+# splice_region_variant
+splice_region_variant <- filter(Chr2.FNL.data, grepl("splice_region_variant", INFO))
+```
+
+
 

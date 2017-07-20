@@ -445,7 +445,37 @@ plot.snps</code></pre>
 </div>
 <div id="subset-snps-between-52.0-and-75.0-mb" class="section level3">
 <h3>Subset SNPs between 52.0 and 75.0 Mb</h3>
-<pre class="r"><code>Chr2.FNL.data &lt;- filter(Chr2.Q40.tidy.data, POS &gt; 52000000 &amp; POS &lt; 75000000)</code></pre>
+<pre class="r"><code>Chr2.Q40.congenic.tidy.data &lt;- filter(Chr2.Q40.tidy.data, POS &gt; 52000000 &amp; POS &lt; 75000000)</code></pre>
+<pre class="r"><code># stop_gained
+stop_gained &lt;- filter(Chr2.Q40.congenic.tidy.data, grepl(&quot;stop_gained&quot;, INFO))</code></pre>
+<p>This is Epac2. Boom!</p>
+</div>
+<div id="lets-make-a-table" class="section level3">
+<h3>Let’s make a table!</h3>
+<pre class="r"><code># count the numbers common and unique to each genotype
+ftable(Chr2.Q40.congenic.tidy.data[,c(&quot;DBA_gt&quot;,&quot;Chr2_gt&quot;)])</code></pre>
+<pre><code>##        Chr2_gt  0/0  0/1  0/2  0/3  1/1  1/2  1/3  2/2  3/3   NA
+## DBA_gt                                                          
+## 0/0               0   41    0    0   80    2    0    0    0    0
+## 0/1             166  130    1    0  172    6    0    2    0   81
+## 0/2               0    1    0    0    1    0    0    0    0    0
+## 1/1            1051  177    2    0 2797   21    0    8    0 2583
+## 1/2              11    4    0    1   25   19    1    0    2   26
+## 1/3               0    0    0    0    0    2    0    2    0    0
+## 2/2               0    3    0    0   14    0    4    0    0    0
+## 3/3               0    0    0    0    0    1    0    0    0    0
+## NA                0   44    0    0 1963   17    0    0    0    0</code></pre>
+<pre class="r"><code># eliminate SNPs that are DBA_gt==1/1 &amp; Chr2_gt==1/1
+Chr2.FNL.data &lt;- subset(Chr2.Q40.congenic.tidy.data,!(DBA_gt==&quot;1/1&quot; &amp; Chr2_gt == &quot;1/1&quot;) )</code></pre>
+</div>
+<div id="lets-start-looking-for-meaningful-variants" class="section level3">
+<h3>Let’s start looking for meaningful variants!</h3>
+<pre class="r"><code># stop_lost
+stop_lost &lt;- filter(Chr2.FNL.data, grepl(&quot;stop_lost&quot;, INFO))
+# start_lost
+start_lost &lt;- filter(Chr2.FNL.data, grepl(&quot;start_lost&quot;, INFO))
+# splice_region_variant
+splice_region_variant &lt;- filter(Chr2.FNL.data, grepl(&quot;splice_region_variant&quot;, INFO))</code></pre>
 </div>
 
 
