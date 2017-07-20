@@ -87,3 +87,35 @@ Chr2.data[,c("DBA_tot.depth","DBA_ref.depth","DBA_ref.qual","DBA_alt.depth","DBA
         )
 head(Chr2.data, 6)
 ```
+
+###Subset Chr2.data QUAL > 40
+
+```{r}
+# subset data keeping only SNPs with quality scores greater than or equal to 40
+Chr2.Q40.data <- subset(Chr2.data, QUAL >= 40)
+```
+
+###Make it a little more user-friendly
+```{r}
+Chr2.Q40.tidy.data <-select(Chr2.Q40.data, -ID, -FILTER, -FORMAT, -DBA, -Chr2, -DBA_gen.lik, -Chr2_gen.lik, -DBA_NObsAllele, -Chr2_NObsAllele)
+```
+
+###Plot Chr2 congenic-specific SNPs (Chr2_gt==1/1) to define introgressed region
+
+```{r}
+library(ggplot2)
+###subset Chr2_gt=="1/1"
+Chr2.XX11.data <- subset(Chr2.Q40.tidy.data, Chr2_gt=="1/1")
+###plot these SNPs using total depth on y-axis and position on x-axis
+plot.snps <- ggplot(Chr2.XX11.data , aes(x=POS, y=Chr2_tot.depth)) + geom_point(size = 0.5) + ylim(0,600) + xlim(5.0e+7, 8.0e+7)
+plot.snps
+```
+
+###This looks reasonable. It looks like the introgressed region is safely in between ~52.0 Mb and 75.0 Mb.
+
+###Subset SNPs between 52.0 and 75.0 Mb
+
+```{r}
+Chr2.FNL.data <- filter(Chr2.Q40.tidy.data, POS > 52000000 & POS < 75000000)
+```
+
