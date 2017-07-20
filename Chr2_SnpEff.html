@@ -466,7 +466,9 @@ ftable(Chr2.Q40.congenic.tidy.data[,c(&quot;DBA_gt&quot;,&quot;Chr2_gt&quot;)])<
 ## 3/3               0    0    0    0    0    1    0    0    0    0
 ## NA                0   44    0    0 1963   17    0    0    0    0</code></pre>
 <pre class="r"><code># eliminate SNPs that are DBA_gt==1/1 &amp; Chr2_gt==1/1
-Chr2.FNL.data &lt;- subset(Chr2.Q40.congenic.tidy.data,!(DBA_gt==&quot;1/1&quot; &amp; Chr2_gt == &quot;1/1&quot;) )</code></pre>
+Chr2.FNL.data &lt;- subset(Chr2.Q40.congenic.tidy.data,!(DBA_gt==&quot;1/1&quot; &amp; Chr2_gt == &quot;1/1&quot;))
+Chr2.FNL.data &lt;- subset(Chr2.FNL.data, !(DBA_gt==&quot;0/1&quot; &amp; Chr2_gt==&quot;0/1&quot;))
+Chr2.FNL.data &lt;- subset(Chr2.FNL.data, !(DBA_gt==&quot;1/2&quot; &amp; Chr2_gt==&quot;1/2&quot;))</code></pre>
 </div>
 <div id="lets-start-looking-for-meaningful-variants" class="section level3">
 <h3>Let’s start looking for meaningful variants!</h3>
@@ -475,7 +477,18 @@ stop_lost &lt;- filter(Chr2.FNL.data, grepl(&quot;stop_lost&quot;, INFO))
 # start_lost
 start_lost &lt;- filter(Chr2.FNL.data, grepl(&quot;start_lost&quot;, INFO))
 # splice_region_variant
-splice_region_variant &lt;- filter(Chr2.FNL.data, grepl(&quot;splice_region_variant&quot;, INFO))</code></pre>
+splice_region_variant &lt;- filter(Chr2.FNL.data, grepl(&quot;splice_region_variant&quot;, INFO))
+# !intergenic_region &amp; intron_variant
+Chr2.InGene &lt;- filter(Chr2.FNL.data, !grepl(&quot;intergenic_region|intron_variant&quot;, INFO))</code></pre>
+<pre class="r"><code># INFO score == &quot;HIGH&quot;
+HIGH &lt;- filter(Chr2.InGene, grepl(&quot;HIGH&quot;, INFO))
+# only detects Epac2 mutation.
+
+# INFO score == &quot;MODERATE&quot;
+MODERATE &lt;- filter(Chr2.InGene, grepl(&quot;MODERATE&quot;, INFO))</code></pre>
+</div>
+<div id="did-not-find-any-meaningful-variants-in-genes-other-than-epac2" class="section level3">
+<h3>Did not find any meaningful variants in genes other than Epac2</h3>
 </div>
 
 

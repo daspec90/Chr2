@@ -138,7 +138,10 @@ ftable(Chr2.Q40.congenic.tidy.data[,c("DBA_gt","Chr2_gt")])
 
 ```{r}
 # eliminate SNPs that are DBA_gt==1/1 & Chr2_gt==1/1
-Chr2.FNL.data <- subset(Chr2.Q40.congenic.tidy.data,!(DBA_gt=="1/1" & Chr2_gt == "1/1") )
+Chr2.FNL.data <- subset(Chr2.Q40.congenic.tidy.data,!(DBA_gt=="1/1" & Chr2_gt == "1/1"))
+Chr2.FNL.data <- subset(Chr2.FNL.data, !(DBA_gt=="0/1" & Chr2_gt=="0/1"))
+Chr2.FNL.data <- subset(Chr2.FNL.data, !(DBA_gt=="1/2" & Chr2_gt=="1/2"))
+
 ```
 
 
@@ -151,7 +154,18 @@ stop_lost <- filter(Chr2.FNL.data, grepl("stop_lost", INFO))
 start_lost <- filter(Chr2.FNL.data, grepl("start_lost", INFO))
 # splice_region_variant
 splice_region_variant <- filter(Chr2.FNL.data, grepl("splice_region_variant", INFO))
+# !intergenic_region & intron_variant
+Chr2.InGene <- filter(Chr2.FNL.data, !grepl("intergenic_region|intron_variant", INFO))
 ```
 
 
+```{r}
+# INFO score == "HIGH"
+HIGH <- filter(Chr2.InGene, grepl("HIGH", INFO))
+# only detects Epac2 mutation.
 
+# INFO score == "MODERATE"
+MODERATE <- filter(Chr2.InGene, grepl("MODERATE", INFO))
+```
+
+###Did not find any meaningful variants in genes other than Epac2
