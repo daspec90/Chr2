@@ -1,0 +1,89 @@
+---
+title: "Chr2_SnpEff"
+author: "Dave Speca"
+date: "7/20/2017"
+output: html_document
+---
+
+####Preliminaries
+
+Exploratory analysis of SnpEff output indicated that SnpEff ANN= data is appended to the INFO column of the .vcf file (column #8), making it quite unwieldy. But I should be able to use dplyr to search for specific strings (variant calls) that have been added by SnpEff.
+
+####SnpEff analysis
+
+N.B. I downloaded the latest version of SnpEff into my home directory. Then within the snpEff home directory I ran this command from the Terminal:
+
+`java -Xmx4g -jar snpEff.jar mm10 Chr2/Chr2.all.vcf  > Chr2.all.ann.vcf`
+
+This (quite rapidly) generated the Chr2.all.ann.vcf file.
+N.B. Chr2.all.vcf was 50Mb, Chr2.all.ann.vcf is 71M, so this just adds additional columns of information. Then I started this new R_project (Chr2) after creating a git repository, and I moved the Chr2.all.ann.vcf file to the project's directory.
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+###Read in the vcf file and add headers of Chr2.all.ann.vcf:
+
+```{r, cache=TRUE}
+# read in .vcf file
+Chr2.data <- read.table("Chr2.all.ann.vcf", as.is=TRUE, na.strings=".")
+vcf.header <- system("grep '#C' Chr2.all.ann.vcf",intern = TRUE)
+vcf.header <- sub("#","",vcf.header) #get rid of the pound sign
+vcf.header <- unlist(strsplit(vcf.header,split="\t"))
+colnames(Chr2.data) <- vcf.header
+head(Chr2.data)
+```
+
+The annotations are contained within the "INFO" variable. I will need to extract them.
+
+Also, the chromosomal positions are not ordered. Let's deal with that now and confirm that the Epac2 mutation is annotated correctly before proceeding.
+
+```{r}
+Chr2.data <- arrange(Chr2.data, POS)
+```
+
+
+The Epac2 mutation (Chr2:72256298 which is in row #33274) appears to be annotated correctly. Yipee!
+
+###String split data
+
+```{r}
+# Before splitting add NAs to blank cells
+
+Chr2.data$DBA[is.na(Chr2.data$DBA)] <- "NA:NA:NA:NA:NA:NA:NA:NA"
+
+DBA.tmp <- matrix(
+  unlist(strsplit(Chr2.data$DBA,split = ":")),
+  nrow=nrow(Chr2.data),
+  byrow=TRUE
+  )
+head(DBA.tmp)
+colnames(DBA.tmp) <- paste("DBA",c("gt","tot.depth","NObsAllele", "ref.depth","ref.qual","alt.depth","alt.qual","gen.lik"),sep="_")
+
+Chr2.data$Chr2[is.na(Chr2.data$Chr2)] <- "NA:NA:NA:NA:NA:NA:NA:NA"
+
+Chr2.tmp <- matrix(
+  unlist(strsplit(Chr2.data$Chr2,split = ":")),
+  nrow=nrow(Chr2.data),
+  byrow=TRUE
+  )
+head(Chr2.tmp)
+colnames(Chr2.tmp) <- paste("Chr2",c("gt","tot.depth","NObsAllele", "ref.depth","ref.qual","alt.depth","alt.qual","gen.lik"),sep="_")
+
+Chr2.data <- cbind(Chr2.data,DBA.tmp,Chr2.tmp,stringsAsFactors=FALSE)
+summary(Chr2.data)
+```
+
+
+###Convert columns back to numeric:
+```{r}
+Chr2.data[,c("DBA_tot.depth","DBA_ref.depth","DBA_ref.qual","DBA_alt.depth","DBA_alt.qual",
+            "Chr2_tot.depth","Chr2_ref.depth","Chr2_ref.qual","Chr2_alt.depth","Chr2_alt.qual")] <- 
+  apply(Chr2.data[,c("DBA_tot.depth","DBA_ref.depth","DBA_ref.qual","DBA_alt.depth","DBA_alt.qual",
+            "Chr2_tot.depth","Chr2_ref.depth","Chr2_ref.qual","Chr2_alt.depth","Chr2_alt.qual")],
+        2,
+        as.numeric
+        )
+head(Chr2.data, 6)
+```
